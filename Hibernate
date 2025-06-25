@@ -1,0 +1,233 @@
+package com.Employee.configuration;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
+public class EmployeeConfiguration {
+	private static final SessionFactory sessionFactory;
+	static {
+		try {
+			sessionFactory=new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
+			
+		}
+		catch(Throwable ex) {
+			throw new ExceptionInInitializerError(ex);
+			
+		}
+	}
+public static SessionFactory getSessionFactory() {
+	return sessionFactory;
+}
+}
+---------------------------------------------------------------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+  <session-factory>
+    <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+    <!-- property name="connection.driver_class">com.mysql.jdbc.Driver</property -->
+    <property name="connection.url">jdbc:mysql://localhost/employee</property>
+    <!-- <property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>-->
+    <property name="connection.username">root</property>
+    <property name="connection.password">Sushree@2002</property>
+    <property name="connection.pool_size">20</property>
+    <!--property name="dialect">org.hibernate.dialect.MySQLDialect</property-->
+    <property name="current_session_context_class">thread</property>
+    <property name="show_sql">true</property>
+    <property name="format_sql">true</property>
+    <property name="hbm2ddl.auto">update</property>
+    <mapping class="com.Employee.entities.Employee" />
+  </session-factory>
+</hibernate-configuration>
+--------------------------------------------------------------------------------------------------------------
+package com.Employee.entities;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "employee")
+public class Employee {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	@Column(name = "name")
+	private String name;
+	@Column(name = "phoneNumber", length = 10)
+	private String phoneNumber;
+	@Column(name = "dept")
+	private String dept;
+	@Column(name = "salary")
+	private Double salary;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public String getDept() {
+		return dept;
+	}
+
+	public void setDept(String dept) {
+		this.dept = dept;
+	}
+
+	public Double getSalary() {
+		return salary;
+	}
+
+	public void setSalary(Double salary) {
+		this.salary = salary;
+	}
+
+	public Employee(Long id, String name, String phoneNumber, String dept, Double salary) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.phoneNumber = phoneNumber;
+		this.dept = dept;
+		this.salary = salary;
+	}
+
+	public Employee(String name, String phoneNumber, String dept, Double salary) {
+		super();
+		this.name = name;
+		this.phoneNumber = phoneNumber;
+		this.dept = dept;
+		this.salary = salary;
+	}
+
+	public Employee() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public String toString() {
+		return "Employee [id=" + id + ", name=" + name + ", phoneNumber=" + phoneNumber + ", dept=" + dept + ", salary="
+				+ salary + "]";
+	}
+
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------
+package com.Employee;
+
+import java.util.ArrayList;
+
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.mapping.List;
+
+import com.Employee.configuration.EmployeeConfiguration;
+import com.Employee.entities.Employee;
+
+public class App {
+
+	public static void main(String[] args) {
+		System.out.println("Hello World!");
+		// Session
+		// session=EmployeeConfiguration.getSessionFactory().getCurrentSession();
+		ArrayList<Employee> employee = new ArrayList<>();
+		Employee emp = new Employee("Sushree", "7845645678", "Qa", 1000.0);
+		Employee emp1 = new Employee("Aparajita", "8765487654", "QA", 20000.0);
+		Employee emp2 = new Employee("Swati", "876547655", "java", 40000.0);
+		Employee emp3 = new Employee("Smruti", "786546788", "Frontend", 50000.0);
+		Employee emp4 = new Employee("Ram", "6789067890", "HR", 35000.0);
+		Employee emp5 = new Employee("Manpreet", "7890678906", "Manager", 200000.0);
+//		saveEmployee(emp);
+//		saveEmployee(emp1);
+//		saveEmployee(emp2);
+//		saveEmployee(emp3);
+//		saveEmployee(emp4);
+//		saveEmployee(emp5);
+		Employee employeeById = getEmployee(3L);
+		if (employeeById != null) {
+			System.out.println((employeeById.toString()));
+		} else {
+			System.out.println("Employee data not found.");
+		}
+
+		//Employee employeeUpdate = new Employee();
+		//updateEmployee(employeeUpdate);
+		//Employee emp1 = new Employee();
+		//saveEmployee(emp1);
+		//System.out.println("save");
+		Employee employeeToUpdate = getEmployee(3L); // fetch employee by ID
+		if (employeeToUpdate != null) {
+		    employeeToUpdate.setName("Akash");
+		    employeeToUpdate.setPhoneNumber("9678945678");
+		    employeeToUpdate.setDept("Hr Admin");
+		    employeeToUpdate.setSalary(9000.0);
+		    updateEmployee(employeeToUpdate);
+		} else {
+		    System.out.println("Employee with ID 3 not found for update.");
+		}
+		deleteEmployee(2L);
+	}
+
+	public static void saveEmployee(Employee st) {
+
+		Session session = EmployeeConfiguration.getSessionFactory().openSession();
+		Transaction trn = session.beginTransaction();
+		session.save(st);
+		trn.commit();
+		System.out.println("Employee data saved.");
+	}
+
+	public static Employee getEmployee(Long id) {
+		Session session = EmployeeConfiguration.getSessionFactory().openSession();
+		return session.get(Employee.class, id);
+	}
+
+	public static void updateEmployee(Employee st) {
+		Session session = EmployeeConfiguration.getSessionFactory().openSession();
+		Transaction trn = session.beginTransaction();
+		session.update(st);
+		trn.commit();
+		System.out.println("Employee data update..");
+	}
+	public static void deleteEmployee(Long id) {
+		Session session = EmployeeConfiguration.getSessionFactory().openSession();
+		Transaction trn = session.beginTransaction();
+		
+		Employee emp = session.get(Employee.class, id); // Fetch entity by ID
+		if (emp != null) {
+			session.delete(emp); // Delete if exists
+			System.out.println("Employee deleted with ID: " + id);
+		} else {
+			System.out.println("Employee not found with ID: " + id);
+		}
+		
+		trn.commit();
+		session.close();
+	}
+
+}
+
