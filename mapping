@@ -1,0 +1,356 @@
+package com.Employee.entities;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "employee")
+public class Employee {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	@Column(name = "Employee_name")
+	private String employee_name;
+	@Column(name = "phoneNumber", length = 10)
+	private String phoneNumber;
+	@Column(name = "dept")
+	private String dept;
+	@Column(name = "salary")
+	private Double salary;
+	@ManyToOne
+	@JoinColumn(name = "Document_id")
+	private Document document;
+	
+	@Override
+	public String toString() {
+		return "Employee [id=" + id + ", employee_name=" + employee_name + ", phoneNumber=" + phoneNumber + ", dept="
+				+ dept + ", salary=" + salary + ", document=" + document + "]";
+	}
+
+	public Employee() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public Employee(Long id, String employee_name, String phoneNumber, String dept, Double salary, Document document) {
+		super();
+		this.id = id;
+		this.employee_name = employee_name;
+		this.phoneNumber = phoneNumber;
+		this.dept = dept;
+		this.salary = salary;
+		this.document = document;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public String getDept() {
+		return dept;
+	}
+
+	public void setDept(String dept) {
+		this.dept = dept;
+	}
+
+	public Double getSalary() {
+		return salary;
+	}
+
+	public void setSalary(Double salary) {
+		this.salary = salary;
+	}
+
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	public String getEmployee_name() {
+		return employee_name;
+	}
+
+	public void setEmployee_name(String string) {
+		this.employee_name=string;
+		
+	}
+	
+	
+
+	
+}
+----------------------------------------------------------------------------------------
+document:-
+
+package com.Employee.entities;
+
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="document")
+public class Document {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	@Column(name="document_name")
+	private String document_name;
+   @OneToMany(mappedBy = "document", cascade = CascadeType.ALL)
+   private List<Employee> employees;
+public Long getId() {
+	return id;
+}
+public void setId(Long id) {
+	this.id = id;
+}
+public String getDocument_name() {
+	return document_name;
+}
+public void setDocument_name(String document_name) {
+	this.document_name = document_name;
+}
+public List<Employee> getEmployees() {
+	return employees;
+}
+public void setEmployees(List<Employee> employees) {
+	this.employees = employees;
+}
+public Document(Long id, String document_name, List<Employee> employees) {
+	super();
+	this.id = id;
+	this.document_name = document_name;
+	this.employees = employees;
+}
+
+public Document() {
+	super();
+	// TODO Auto-generated constructor stub
+}
+@Override
+public String toString() {
+	return "Document [id=" + id + ", document_name=" + document_name + ", employees=" + employees + "]";
+}
+   
+	}
+ 
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+package com.Employee;
+import java.util.ArrayList;
+import java.util.List;
+
+//import javax.transaction.Transaction;
+
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import com.Employee.configuration.EmployeeConfiguration;
+import com.Employee.entities.Document;
+import com.Employee.entities.Employee;
+
+public class App {
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
+
+        Document doc = new Document();
+        doc.setDocument_name("Pan Card, Aadhar, Certificate, Photo");
+
+        Employee emp = new Employee();
+        emp.setEmployee_name("Sushree");
+        emp.setPhoneNumber("7845645678");
+        emp.setDept("QA");
+        emp.setSalary(10000.0);
+        emp.setDocument(doc);
+
+        Employee emp1 = new Employee();
+        emp1.setEmployee_name("Swagatika");
+        emp1.setPhoneNumber("8765476554");
+        emp1.setDept("HR");
+        emp1.setSalary(15000.0);
+        emp1.setDocument(doc);
+
+        List<Employee> employees = new ArrayList<>();
+        employees.add(emp);
+        employees.add(emp1);
+
+        doc.setEmployees(employees);
+
+        saveDocument(doc); // This saves both document and employees
+    }
+
+    public static void saveDocument(Document doc) {
+        Session session = EmployeeConfiguration.getSessionFactory().openSession();
+        Transaction trn = session.beginTransaction();
+        session.save(doc);  // CascadeType.ALL will save employees too
+        trn.commit();
+        session.close();
+        System.out.println("Document and associated Employees saved.");
+    }
+
+    
+}
+
+-----------------------------------------------------------------------__________________________-----------------------------------------------------------------------------------------
+
+//        Document doc = new Document();
+//        doc.setDocumentName("PAN Card");
+//        doc.setId(5l);
+//        List<Employee> empList=Arrays.asList(new Employee("PUPU", doc),new Employee("PUPULU", doc));
+//        for(Employee emp:empList) {
+//        	saveEmployee(emp);;
+		// }
+//        Employee emp = new Employee();
+//        emp.setEmployee_Name("Sushree1");
+//        emp.setDocument(doc);  // Set the relation
+//      saveDocument(doc); 
+//        doc.setEmployees(emp);  // Optional (only if bidirectional)
+//        saveEmployee(emp);
+
+		
+		// Create documents
+//            Document doc1 = new Document();
+//            doc1.setDocumentName("PAN CARD");
+//            doc1.setDocumentNo("CHSDN8888");
+//
+//            Document doc2 = new Document();
+//            doc2.setDocumentName("Aadhar Card");
+//            doc2.setDocumentNo("");
+//
+//            Document doc3 = new Document();
+//            doc3.setDocumentName("Photo");
+
+		// Create employees and associate with documents
+		Employee emp1 = new Employee();
+		emp1.setEmployee_Name("Sushree");
+		List<Document> docList1 = Arrays.asList(new Document("PAN", "DHDSDNSDS",emp1),
+				new Document("ADDHAR", "67672771283712",emp1));
+		emp1.setDocumentList(docList1);
+		
+		
+		Employee emp2=new Employee();
+		emp2.setEmployee_Name("Salini");
+		List<Document> docList2=Arrays.asList(new Document("Photo","2",emp2),
+				new Document("Adarcard","656852727466",emp2),
+				new Document("pan card","DERT23536",emp2));
+		emp2.setDocumentList(docList2);
+				
+//		saveEmployee(emp1);
+		saveEmployee(emp2);
+		Employee emp=getEmployee(3L);
+		for(Document doc:emp.getDocumentList()) {
+			System.out.println(doc.toString());
+		}
+		
+		public static void saveDocument(Document doc, Document doc1, Document doc2) {
+//		
+//        Session session = EmployeeConfiguration.getSessionFactory().openSession();
+//        Transaction tx = session.beginTransaction();
+//
+//        session.save(doc);  // CascadeType.ALL will save doc too
+//
+//        tx.commit();
+//        session.close();
+//
+//        System.out.println("Employee and Document saved successfully.");
+//	}
+//public static void saveEmployee(Employee doc, Employee emp1, Employee emp2) {
+//		
+//        Session session = EmployeeConfiguration.getSessionFactory().openSession();
+//        Transaction tx = session.beginTransaction();
+//
+//        session.save(doc);  // CascadeType.ALL will save doc too
+//
+//        tx.commit();
+//        session.close();
+// 
+//        System.out.println("Employee and Document saved successfully.");
+//
+
+//public static void saveDocument(Document doc) {
+//    Session session = EmployeeConfiguration.getSessionFactory().openSession();
+//    Transaction tx = session.beginTransaction();
+//    session.save(doc);  // Will cascade and save employees
+//    tx.commit();
+//    session.close();
+//    System.out.println("Saved document: " + doc.getDocumentName());
+	}
+
+	public static void saveEmployee(Employee emp) {
+
+		Session session = EmployeeConfiguration.getSessionFactory().openSession();
+		Transaction tx = session.beginTransaction();
+
+		session.save(emp); // CascadeType.ALL will save doc too
+
+		tx.commit();
+		session.close();
+
+		System.out.println("Employee and Document saved successfully.");
+	}
+	
+	public static Employee getEmployee(Long id) {
+		Session session = EmployeeConfiguration.getSessionFactory().openSession();
+		return session.get(Employee.class, id);
+	}
+}
+----------------------------------------------------------------------------
+@Entity
+@Table(name = "document")
+public class Document {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	@Column(name = "document_name")
+	private String documentName;
+	@Column(name = "document_no")
+	private String documentNo;
+	@ManyToOne
+	@JoinColumn(name = "employee_id")
+	private Employee employee;
+
+	public Long getId() {
+		return id;
+	}
+----------------------------------------------------------------------------------
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	@Column(name = "Employee_Name")
+	private String Employee_Name;
+	@OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
+	private List<Document> documentList;
+
+	public Long getId() {
+		return id;
+	}
+
